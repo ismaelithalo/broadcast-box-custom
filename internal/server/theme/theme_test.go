@@ -24,11 +24,15 @@ func TestThemeDefaultsAndSave(t *testing.T) {
 	if def.PrimaryColor != "#2563eb" {
 		t.Fatalf("expected PrimaryColor '#2563eb', got %s", def.PrimaryColor)
 	}
+	if def.DefaultLocale != "pt-BR" {
+		t.Fatalf("expected DefaultLocale 'pt-BR', got %s", def.DefaultLocale)
+	}
 
 	// Save custom theme
 	custom := def
 	custom.SiteName = "My Custom Box"
 	custom.PrimaryColor = "#ff0000"
+	custom.DefaultLocale = "en"
 	if err := SaveTheme(custom); err != nil {
 		t.Fatalf("failed to save theme: %v", err)
 	}
@@ -40,6 +44,9 @@ func TestThemeDefaultsAndSave(t *testing.T) {
 	if loaded.PrimaryColor != "#ff0000" {
 		t.Fatalf("expected PrimaryColor '#ff0000', got %s", loaded.PrimaryColor)
 	}
+	if loaded.DefaultLocale != "en" {
+		t.Fatalf("expected DefaultLocale 'en', got %s", loaded.DefaultLocale)
+	}
 
 	// Reset to default
 	if err := SaveTheme(DefaultTheme()); err != nil {
@@ -49,5 +56,8 @@ func TestThemeDefaultsAndSave(t *testing.T) {
 	restored := GetTheme()
 	if restored.SiteName != "Broadcast Box" {
 		t.Fatalf("expected restored SiteName 'Broadcast Box', got %s", restored.SiteName)
+	}
+	if restored.DefaultLocale != "pt-BR" {
+		t.Fatalf("expected restored DefaultLocale 'pt-BR', got %s", restored.DefaultLocale)
 	}
 }

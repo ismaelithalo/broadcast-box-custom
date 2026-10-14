@@ -16,6 +16,7 @@ export interface ThemeSettings {
   backgroundImageUrl: string;
   backgroundOpacity: number;
   backgroundBlur: number;
+  defaultLocale: string;
 }
 
 export const GRADIENT_PRESETS: Record<string, { name: string; css: string; preview: string }> = {
@@ -94,6 +95,7 @@ export const DEFAULT_THEME: ThemeSettings = {
   backgroundImageUrl: "",
   backgroundOpacity: 100,
   backgroundBlur: 0,
+  defaultLocale: "pt-BR",
 };
 
 interface ThemeContextProps {

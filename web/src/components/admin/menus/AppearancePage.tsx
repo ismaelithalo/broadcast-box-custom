@@ -125,13 +125,29 @@ export default function AppearancePage() {
       <div className="bg-gray-800/80 border border-gray-700 rounded-lg p-5 flex flex-col gap-4">
         <h2 className="text-xl font-semibold text-white">1. Identidade da Plataforma</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Input
             label="Nome da Plataforma"
             value={form.siteName}
             setValue={(val) => setForm((prev) => ({ ...prev, siteName: val }))}
             placeholder="Ex: Minha Live Box"
           />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Idioma Padrão do Sistema</label>
+            <select
+              value={form.defaultLocale || "pt-BR"}
+              onChange={(e) => setForm((prev) => ({ ...prev, defaultLocale: e.target.value }))}
+              className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-white focus:outline-none focus:border-blue-500"
+            >
+              <option value="pt-BR">Português (Brasil) (pt-BR)</option>
+              <option value="en">English (en)</option>
+              <option value="dk">Dansk (dk)</option>
+            </select>
+            <p className="text-xs text-gray-400 mt-1">
+              Idioma inicial para novos visitantes da plataforma.
+            </p>
+          </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-1">Fonte da Interface</label>

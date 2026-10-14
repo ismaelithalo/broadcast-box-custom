@@ -23,6 +23,7 @@ type ThemeSettings struct {
 	BackgroundImageURL    string `json:"backgroundImageUrl"`
 	BackgroundOpacity     int    `json:"backgroundOpacity"` // 0-100
 	BackgroundBlur        int    `json:"backgroundBlur"`    // 0-20 (px)
+	DefaultLocale         string `json:"defaultLocale"`     // "pt-BR" | "en" | "dk"
 }
 
 var (
@@ -46,6 +47,7 @@ func DefaultTheme() ThemeSettings {
 		BackgroundImageURL: "",
 		BackgroundOpacity:  100,
 		BackgroundBlur:     0,
+		DefaultLocale:      "pt-BR",
 	}
 }
 
@@ -62,6 +64,10 @@ func GetTheme() ThemeSettings {
 	if err := json.Unmarshal(data, &theme); err != nil {
 		slog.Error("Theme: Failed to unmarshal theme settings, returning default", "err", err)
 		return DefaultTheme()
+	}
+
+	if theme.DefaultLocale == "" {
+		theme.DefaultLocale = "pt-BR"
 	}
 
 	return theme

@@ -12,5 +12,6 @@
   "customGradient": "",
   "backgroundImageUrl": "",
   "backgroundOpacity": 100,
-  "backgroundBlur": 0
+  "backgroundBlur": 0,
+  "defaultLocale": "pt-BR"
 }

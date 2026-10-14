@@ -11,10 +11,10 @@
 - [ ] **2. Gerenciamento de MOTD e Visibilidade no Painel de Admin**
   - [ ] Visualizar e editar o MOTD diretamente na tabela/modal de perfis no painel Admin
   - [ ] Alternar visibilidade (Público/Privado) diretamente pelo painel Admin
-- [ ] **3. Suporte a Português do Brasil (PT-BR) e Idioma Padrão**
-  - [ ] Adicionar arquivo de tradução completo em Português do Brasil (`pt-BR`)
-  - [ ] Definir PT-BR como idioma padrão da plataforma
-  - [ ] Permitir configurar o idioma padrão através do painel de Admin
+- [x] **3. Suporte a Português do Brasil (PT-BR) e Idioma Padrão**
+  - [x] Adicionar arquivo de tradução completo em Português do Brasil (`pt-BR`)
+  - [x] Definir PT-BR como idioma padrão da plataforma
+  - [x] Permitir configurar o idioma padrão através do painel de Admin
 - [ ] **4. Webhook / Endpoint de Alertas de Transmissões Iniciadas**
   - [ ] Cadastrar URL de endpoint no painel/configurações para disparo de notificações de início de live
   - [ ] Disparar payload com dados da transmissão (streamKey, MOTD, horário, etc.) ao iniciar uma live
