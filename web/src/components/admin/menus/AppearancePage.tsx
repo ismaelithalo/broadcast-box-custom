@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import Button from "../../shared/Button";
 import Input from "../../shared/Input";
-import { useTheme, GRADIENT_PRESETS, FONT_PRESETS, ThemeSettings } from "../../../providers/ThemeProvider";
+import { useTheme, GRADIENT_PRESETS, FONT_PRESETS, ThemeSettings, DEFAULT_THEME } from "../../../providers/ThemeProvider";
 import { getAdminAuthorizationHeader } from "../adminAuth";
 
 export default function AppearancePage() {
@@ -71,9 +71,10 @@ export default function AppearancePage() {
     if (!window.confirm("Deseja realmente restaurar todas as configurações de aparência para o padrão original?")) {
       return;
     }
-    setForm(DEFAULT_THEME);
+    const defaultSettings = { ...DEFAULT_THEME };
+    setForm(defaultSettings);
     setIsSaving(true);
-    const ok = await saveTheme(DEFAULT_THEME);
+    const ok = await saveTheme(defaultSettings);
     setIsSaving(false);
     if (ok) {
       setSaveSuccess("Tema restaurado para o padrão original com sucesso!");

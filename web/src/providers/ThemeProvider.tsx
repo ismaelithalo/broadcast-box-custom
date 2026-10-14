@@ -101,6 +101,8 @@ interface ThemeContextProps {
   saveTheme: (newTheme: ThemeSettings) => Promise<boolean>;
   refreshTheme: () => Promise<void>;
   getBackgroundStyle: () => React.CSSProperties;
+  channelBackground: string | null;
+  setChannelBackground: (bg: string | null) => void;
 }
 
 export const ThemeContext = createContext<ThemeContextProps>({
@@ -108,10 +110,13 @@ export const ThemeContext = createContext<ThemeContextProps>({
   saveTheme: async () => false,
   refreshTheme: async () => {},
   getBackgroundStyle: () => ({}),
+  channelBackground: null,
+  setChannelBackground: () => {},
 });
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [theme, setTheme] = useState<ThemeSettings>(DEFAULT_THEME);
+  const [channelBackground, setChannelBackground] = useState<string | null>(null);
 
   const applyThemeToDOM = useCallback((t: ThemeSettings) => {
     const root = document.documentElement;
@@ -183,6 +188,17 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 
   const getBackgroundStyle = useCallback((): React.CSSProperties => {
+    if (channelBackground) {
+      return {
+        backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url(${channelBackground})`,
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundAttachment: "fixed",
+        backgroundColor: theme.backgroundColor,
+        minHeight: "100vh",
+      };
+    }
+
     const style: React.CSSProperties = {
       backgroundColor: theme.backgroundColor,
       minHeight: "100vh",
@@ -202,7 +218,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     return style;
-  }, [theme]);
+  }, [channelBackground, theme]);
 
   const value = useMemo(
     () => ({
@@ -210,8 +226,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       saveTheme,
       refreshTheme,
       getBackgroundStyle,
+      channelBackground,
+      setChannelBackground,
     }),
-    [theme, saveTheme, refreshTheme, getBackgroundStyle]
+    [theme, saveTheme, refreshTheme, getBackgroundStyle, channelBackground, setChannelBackground]
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

@@ -7,6 +7,7 @@ import (
 
 	"github.com/glimesh/broadcast-box/internal/server/authorization"
 	"github.com/glimesh/broadcast-box/internal/server/helpers"
+	"github.com/glimesh/broadcast-box/internal/webrtc/sessions/manager"
 )
 
 // Retrieve all existing profiles
@@ -156,6 +157,14 @@ func ProfileUpdateHandler(responseWriter http.ResponseWriter, request *http.Requ
 		slog.Error("API.Admin.ProfileUpdateHandler", "err", err)
 		helpers.LogHTTPError(responseWriter, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	if session, ok := manager.SessionsManager.GetSessionByID(payload.StreamKey); ok {
+		session.StatusLock.Lock()
+		session.MOTD = payload.MOTD
+		session.IsPublic = payload.IsPublic
+		session.BackgroundImage = payload.BackgroundImage
+		session.StatusLock.Unlock()
 	}
 
 	responseWriter.WriteHeader(http.StatusOK)

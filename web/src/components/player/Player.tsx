@@ -317,7 +317,7 @@ const Player = (props: PlayerProps) => {
 					w-full
 					h-full
 					z-20
-					${streamState !== "Playing" && "bg-gray-950"}
+					${streamState !== "Playing" && "bg-slate-950/80 backdrop-blur-xs"}
 					${streamState === "Playing" && `
 						transition-opacity
 						duration-500
@@ -422,7 +422,7 @@ const Player = (props: PlayerProps) => {
 					autoPlay
 					muted={isVideoMuted}
 					playsInline
-					className="rounded-md w-full h-full relative bg-gray-950"
+					className="rounded-md w-full h-full relative bg-transparent"
 					onPlaying={() => setStreamState("Playing")}
 					onLoadStart={() => setStreamState("Loading")}
 					onVolumeChange={(event) => {

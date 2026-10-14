@@ -1,7 +1,7 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import ReactGridLayout, { useContainerWidth } from "react-grid-layout";
 import Player, { type ReactionSender } from "./Player";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { CinemaModeContext } from "../../providers/CinemaModeProvider";
 import ModalTextInput from "../shared/ModalTextInput";
 import Button from "../shared/Button";
@@ -11,16 +11,29 @@ import ChatPanel from "./components/ChatPanel";
 import { ChatAdapter } from "../../hooks/useChatSession";
 import { StreamMOTD } from "./components/StreamMOTD";
 import { StreamStatus } from "../../providers/StatusProvider";
+import { useTheme } from "../../providers/ThemeProvider";
 
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 
 const PlayerPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { setChannelBackground } = useTheme();
   const { width: playerGridWidth, containerRef: playerGridRef } = useContainerWidth();
   const { locale } = useContext(LocaleContext);
   const { cinemaMode, toggleCinemaMode } = useContext(CinemaModeContext);
-  const [streamKeys, setStreamKeys] = useState<string[]>([window.location.pathname.substring(1)]);
+  const currentPathKey = location.pathname.replace(/^\/+/, "");
+  const [streamKeys, setStreamKeys] = useState<string[]>([currentPathKey]);
+  const isSingleStream = streamKeys.length === 1;
+
+  useEffect(() => {
+    const key = location.pathname.replace(/^\/+/, "");
+    if (key && (streamKeys.length !== 1 || streamKeys[0] !== key)) {
+      setStreamKeys([key]);
+    }
+  }, [location.pathname]);
+
   const [isModalOpen, setIsModelOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(() => localStorage.getItem("chat-open") !== "false");
   const [chatAdapters, setChatAdapters] = useState<Record<string, ChatAdapter | undefined>>({});
@@ -42,13 +55,30 @@ const PlayerPage = () => {
           if (data) {
             setStreamStatuses((prev) => ({
               ...prev,
-              [key]: data,
+              [key]: {
+                ...prev[key],
+                ...data,
+                backgroundImage: data.backgroundImage || prev[key]?.backgroundImage,
+              },
             }));
           }
         })
         .catch(() => {});
     });
   }, [streamKeys]);
+
+  useEffect(() => {
+    if (isSingleStream) {
+      const bg = streamStatuses[streamKeys[0]]?.backgroundImage;
+      setChannelBackground(bg || null);
+    } else {
+      setChannelBackground(null);
+    }
+
+    return () => {
+      setChannelBackground(null);
+    };
+  }, [isSingleStream, streamKeys, streamStatuses, setChannelBackground]);
 
   const addStream = (streamKey: string) => {
     if (streamKeys.some((key: string) => key.toLowerCase() === streamKey.toLowerCase())) {
@@ -92,7 +122,13 @@ const PlayerPage = () => {
 
       return {
         ...current,
-        [streamKey]: status,
+        [streamKey]: status
+          ? {
+              ...current[streamKey],
+              ...status,
+              backgroundImage: status.backgroundImage || current[streamKey]?.backgroundImage,
+            }
+          : undefined,
       };
     });
   }, []);
@@ -126,7 +162,6 @@ const PlayerPage = () => {
     setIsDisplayNameModalOpen(false);
   }, []);
 
-  const isSingleStream = streamKeys.length === 1;
   const playerGridColumns = isSingleStream ? 1 : 2;
   const playerGridGap = 8;
   const playerGridRowHeight = 16;
@@ -172,19 +207,9 @@ const PlayerPage = () => {
         />
       )}
 
-      {(() => {
-        const singleStreamBg = isSingleStream ? streamStatuses[streamKeys[0]]?.backgroundImage : undefined;
-        return (
-          <div 
-            className={`flex flex-col w-full items-center min-h-[calc(100vh-4.5rem)] transition-all duration-500 ${!cinemaMode && "mx-auto px-2 py-2 container"}`}
-            style={singleStreamBg ? {
-              backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.70), rgba(15, 23, 42, 0.85)), url(${singleStreamBg})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              backgroundAttachment: 'fixed',
-              borderRadius: '0.75rem',
-            } : undefined}
-          >
+      <div 
+        className={`flex flex-col w-full items-center min-h-[calc(100vh-4.5rem)] transition-all duration-500 ${!cinemaMode && "mx-auto px-2 py-2 container"}`}
+      >
         <div ref={playerGridRef} className="w-full">
           <ReactGridLayout
             dragConfig={{
@@ -204,12 +229,14 @@ const PlayerPage = () => {
             gridConfig={{ cols: 12, rowHeight: playerGridRowHeight, margin: [playerGridGap, playerGridGap], containerPadding: [0, 0] }}
           >
             {streamKeys.map((streamKey) => {
-              const profileBg = streamStatuses[streamKey]?.backgroundImage;
+              const profileBg = !isSingleStream ? streamStatuses[streamKey]?.backgroundImage : undefined;
               return (
                 <div
                   key={`${streamKey}_player_card`}
-                  className={`min-w-0 flex h-full flex-col gap-1 overflow-hidden transition-all duration-300 ${
-                    profileBg ? "p-3 rounded-xl bg-cover bg-center shadow-2xl relative" : ""
+                  className={`min-w-0 flex h-full flex-col gap-1 overflow-hidden transition-all duration-300 rounded-xl p-3 shadow-2xl ${
+                    profileBg
+                      ? "bg-cover bg-center relative"
+                      : "bg-slate-900/60 backdrop-blur-md border border-slate-700/50"
                   }`}
                   style={profileBg ? { backgroundImage: `url(${profileBg})` } : undefined}
                 >
@@ -273,9 +300,7 @@ const PlayerPage = () => {
           />
         </div>
       </div>
-    );
-  })()}
-</div>
+    </div>
   );
 };
 
