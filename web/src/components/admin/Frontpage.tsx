@@ -6,6 +6,7 @@ import StatusPage from "./menus/StatusPage";
 import ProfilesPage from "./menus/ProfilesPage";
 import ApiPage from "./menus/ApiPage";
 import LoggingPage from "./menus/LoggingPage";
+import AppearancePage from "./menus/AppearancePage";
 import { LocaleContext } from "../../providers/LocaleProvider";
 import { clearAdminToken } from "./adminAuth";
 const AdminFrontpage = () => {
@@ -29,12 +30,12 @@ const AdminFrontpage = () => {
             <div className="flex flex-col h-full p-2 space-y-2">
               <Button title={locale.admin_page.menu_status} stretch onClick={() => onChangeMenu("Status")} />
               <Button title={locale.admin_page.menu_profiles} stretch onClick={() => onChangeMenu("Profiles")} />
+              <Button title="Aparência & Tema" stretch onClick={() => onChangeMenu("Appearance")} />
               <Button title={locale.admin_page.menu_api} stretch onClick={() => onChangeMenu("API")} isDisabled />
               <Button title={locale.admin_page.menu_logging} stretch onClick={() => onChangeMenu("Logging")} />
             </div>
 
             <div className="flex flex-col p-2 space-y-2">
-              <Button title={locale.admin_page.menu_settings} stretch onClick={() => onChangeMenu("Settings")} isDisabled />
               <Button title={locale.admin_page.menu_logout} stretch onClick={logout} />
             </div>
           </Card>
@@ -44,6 +45,7 @@ const AdminFrontpage = () => {
           <Card>
             {currentMenu === "Status" && <StatusPage />}
             {currentMenu === "Profiles" && <ProfilesPage />}
+            {currentMenu === "Appearance" && <AppearancePage />}
             {currentMenu === "API" && <ApiPage />}
             {currentMenu === "Logging" && <LoggingPage />}
           </Card>

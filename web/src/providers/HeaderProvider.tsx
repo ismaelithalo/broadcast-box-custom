@@ -1,12 +1,13 @@
-﻿import React, { useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { ThemeContext } from "./ThemeProvider";
 
 interface HeaderProviderContextProps {
 	title: string;
-	setTitle: (trtle: string) => void
+	setTitle: (subTitle: string) => void;
 }
 
 export const HeaderContext = React.createContext<HeaderProviderContextProps>({
-	title: "BroadcastBox",
+	title: "Broadcast Box",
 	setTitle: () => { },
 });
 
@@ -15,12 +16,23 @@ interface HeaderProviderProps {
 }
 
 export function HeaderProvider(props: HeaderProviderProps) {
-	const [title, setTitle] = useState("BroadcastBox")
+	const { theme } = useContext(ThemeContext);
+	const [subTitle, setSubTitle] = useState("");
+
+	const siteName = theme.siteName || "Broadcast Box";
+
+	const currentTitle = useMemo(() => {
+		return subTitle !== "" ? `${siteName} - ${subTitle}` : siteName;
+	}, [siteName, subTitle]);
+
+	useEffect(() => {
+		document.title = currentTitle;
+	}, [currentTitle]);
 
 	const state = useMemo<HeaderProviderContextProps>(() => ({
-		title: title,
-		setTitle: (value) => setTitle(() => value !== "" ? `BroadcastBox - ${value}` : "BroadcastBox")
-	}), [title]);
+		title: currentTitle,
+		setTitle: (value: string) => setSubTitle(value),
+	}), [currentTitle]);
 
 	return (
 		<HeaderContext.Provider value={state}>

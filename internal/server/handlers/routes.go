@@ -37,6 +37,13 @@ func GetServeMuxHandler() http.HandlerFunc {
 	serverMux.HandleFunc("/api/log", corsHandler(logHandler))
 	serverMux.HandleFunc("/api/status", corsHandler(statusHandler))
 
+	// Theme endpoints
+	serverMux.HandleFunc("/api/theme", corsHandler(ThemeHandler))
+
+	// Uploads static directory
+	EnsureUploadDir()
+	serverMux.Handle("/uploads/", http.StripPrefix("/uploads/", http.FileServer(http.Dir(UploadDir))))
+
 	// Admin endpoints
 	serverMux.HandleFunc("/api/admin/login", corsHandler(adminHandlers.LoginHandler))
 	serverMux.HandleFunc("/api/admin/status", corsHandler(adminHandlers.StatusHandler))
@@ -45,6 +52,9 @@ func GetServeMuxHandler() http.HandlerFunc {
 	serverMux.HandleFunc("/api/admin/profiles/reset-token", corsHandler(adminHandlers.ProfilesResetTokenHandler))
 	serverMux.HandleFunc("/api/admin/profiles/add-profile", corsHandler(adminHandlers.ProfileAddHandler))
 	serverMux.HandleFunc("/api/admin/profiles/remove-profile", corsHandler(adminHandlers.ProfileRemoveHandler))
+	serverMux.HandleFunc("/api/admin/profiles/update", corsHandler(adminHandlers.ProfileUpdateHandler))
+	serverMux.HandleFunc("/api/admin/theme", corsHandler(adminHandlers.ThemeSaveHandler))
+	serverMux.HandleFunc("/api/admin/upload", corsHandler(UploadHandler))
 
 	// Path middleware
 	debugOutputWebRequests := os.Getenv(environment.DebugIncomingAPIRequest)

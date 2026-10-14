@@ -7,19 +7,21 @@ import (
 
 // Status for an individual streaming session
 type whipSessionStatus struct {
-	StreamKey   string    `json:"streamKey"`
-	MOTD        string    `json:"motd"`
-	ViewerCount int       `json:"viewers"`
-	IsOnline    bool      `json:"isOnline"`
-	StreamStart time.Time `json:"streamStart"`
+	StreamKey       string    `json:"streamKey"`
+	MOTD            string    `json:"motd"`
+	BackgroundImage string    `json:"backgroundImage"`
+	ViewerCount     int       `json:"viewers"`
+	IsOnline        bool      `json:"isOnline"`
+	StreamStart     time.Time `json:"streamStart"`
 }
 
 // Information for a whip session
 type StreamSessionState struct {
-	StreamKey   string    `json:"streamKey"`
-	IsPublic    bool      `json:"isPublic"`
-	MOTD        string    `json:"motd"`
-	StreamStart time.Time `json:"streamStart"`
+	StreamKey       string    `json:"streamKey"`
+	IsPublic        bool      `json:"isPublic"`
+	MOTD            string    `json:"motd"`
+	BackgroundImage string    `json:"backgroundImage"`
+	StreamStart     time.Time `json:"streamStart"`
 
 	AudioTracks []AudioTrackState `json:"audioTracks"`
 	VideoTracks []VideoTrackState `json:"videoTracks"`

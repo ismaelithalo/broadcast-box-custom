@@ -101,6 +101,38 @@ func UpdateProfile(token string, motd string, isPublic bool) error {
 	return nil
 }
 
+// Update profile by stream key (used by admin portal)
+func UpdateProfileByStreamKey(streamKey string, motd string, isPublic bool, backgroundImage string) error {
+	fileName, err := getProfileFileNameByStreamKey(streamKey)
+	if err != nil || fileName == "" {
+		return fmt.Errorf("profile was not found")
+	}
+
+	profilePath := os.Getenv(environment.StreamProfilePath)
+	fullPath := filepath.Join(profilePath, fileName)
+
+	data, err := os.ReadFile(fullPath)
+	if err != nil {
+		return err
+	}
+
+	var p profile
+	if err := json.Unmarshal(data, &p); err != nil {
+		return err
+	}
+
+	p.MOTD = motd
+	p.IsPublic = isPublic
+	p.BackgroundImage = backgroundImage
+
+	jsonData, err := json.MarshalIndent(p, "", " ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(fullPath, jsonData, 0644)
+}
+
 func RemoveProfile(streamKey string) (bool, error) {
 	if !isValidStreamKey(streamKey) {
 		slog.Error("Authorization: Remove profile failed due to invalid streamkey", "streamKey", streamKey)
@@ -140,6 +172,31 @@ func GetPublicProfile(bearerToken string) (*PublicProfile, error) {
 	var profile profile
 	if err := json.Unmarshal(data, &profile); err != nil {
 		slog.Error("Authorization: could not read. File may be corrupt", "err", err, "bearerToken", bearerToken)
+		return nil, err
+	}
+	profile.FileName = fileName
+
+	return profile.asPublicProfile(), nil
+}
+
+// Returns the public profile by stream key (does not require bearer token)
+func GetProfileByStreamKey(streamKey string) (*PublicProfile, error) {
+	profilePath := os.Getenv(environment.StreamProfilePath)
+	assureProfilePath()
+
+	fileName, err := getProfileFileNameByStreamKey(streamKey)
+	if err != nil || fileName == "" {
+		return nil, fmt.Errorf("profile was not found")
+	}
+
+	data, err := os.ReadFile(filepath.Join(profilePath, fileName))
+	if err != nil {
+		return nil, err
+	}
+
+	var profile profile
+	if err := json.Unmarshal(data, &profile); err != nil {
+		slog.Error("Authorization: could not read profile by streamKey", "err", err, "streamKey", streamKey)
 		return nil, err
 	}
 	profile.FileName = fileName

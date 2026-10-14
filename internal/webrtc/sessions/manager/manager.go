@@ -23,10 +23,11 @@ func (m *SessionManager) addSession(profile authorization.PublicProfile) (s *ses
 
 	s = &session.Session{
 
-		StreamKey:   profile.StreamKey,
-		IsPublic:    profile.IsPublic,
-		MOTD:        profile.MOTD,
-		StreamStart: time.Now(),
+		StreamKey:       profile.StreamKey,
+		IsPublic:        profile.IsPublic,
+		MOTD:            profile.MOTD,
+		BackgroundImage: profile.BackgroundImage,
+		StreamStart:     time.Now(),
 
 		WHEPSessions: map[string]*whep.WHEPSession{},
 		ChatManager:  m.ChatManager,
@@ -88,13 +89,14 @@ func (m *SessionManager) GetSessionStates(includePrivateStreams bool) (result []
 		}
 
 		streamSession := session.StreamSessionState{
-			StreamKey:   s.StreamKey,
-			StreamStart: s.StreamStart,
-			IsPublic:    s.IsPublic,
-			MOTD:        s.MOTD,
-			Sessions:    []whep.SessionState{},
-			VideoTracks: []session.VideoTrackState{},
-			AudioTracks: []session.AudioTrackState{},
+			StreamKey:       s.StreamKey,
+			StreamStart:     s.StreamStart,
+			IsPublic:        s.IsPublic,
+			MOTD:            s.MOTD,
+			BackgroundImage: s.BackgroundImage,
+			Sessions:        []whep.SessionState{},
+			VideoTracks:     []session.VideoTrackState{},
+			AudioTracks:     []session.AudioTrackState{},
 		}
 
 		s.StatusLock.RUnlock()
@@ -158,6 +160,7 @@ func (m *SessionManager) UpdateProfile(profile *authorization.PersonalProfile) {
 		whipSession.StatusLock.Lock()
 		whipSession.MOTD = profile.MOTD
 		whipSession.IsPublic = profile.IsPublic
+		whipSession.BackgroundImage = profile.BackgroundImage
 		whipSession.StatusLock.Unlock()
 	}
 }

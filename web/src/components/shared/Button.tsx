@@ -36,6 +36,7 @@ interface Props {
 
 export default function Button(props: Props) {
 
+  const isDefault = !props.isDisabled && props.color !== "Accept" && props.color !== "Deny";
   const color = props.isDisabled ? colorMapping.Disabled
     : props.color === "Accept" ? colorMapping.Accept
       : props.color === "Deny" ? colorMapping.Deny
@@ -43,7 +44,8 @@ export default function Button(props: Props) {
 
   return (
     <button
-      className={`flex text-white font-medium px-4 py-2 rounded ${props.center === true ? "justify-center" : ""} ${props.stretch ? "w-full" : "w-fit"} ${color.base} ${color.hover} ${props.classNames}`}
+      className={`flex text-white font-medium px-4 py-2 rounded transition-all duration-200 cursor-pointer ${props.center === true ? "justify-center" : ""} ${props.stretch ? "w-full" : "w-fit"} ${!isDefault ? `${color.base} ${color.hover}` : "hover:brightness-110 active:brightness-95"} ${props.classNames || ""}`}
+      style={isDefault ? { backgroundColor: 'var(--color-primary, #2563eb)' } : undefined}
       onClick={!props.isDisabled ? props.onClick : undefined}
     >
       {props.iconLeft && (

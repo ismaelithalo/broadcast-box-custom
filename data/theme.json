@@ -1,0 +1,16 @@
+{
+  "siteName": "Broadcast Box",
+  "logoUrl": "",
+  "faviconUrl": "/favicon.ico",
+  "fontFamily": "system-ui",
+  "primaryColor": "#2563eb",
+  "navbarColor": "#1f2937",
+  "backgroundColor": "#0f172a",
+  "cardColor": "#1e293b",
+  "backgroundMode": "solid",
+  "gradientPreset": "none",
+  "customGradient": "",
+  "backgroundImageUrl": "",
+  "backgroundOpacity": 100,
+  "backgroundBlur": 0
+}

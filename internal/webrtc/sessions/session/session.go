@@ -17,6 +17,7 @@ func (s *Session) UpdateStreamStatus(profile authorization.PublicProfile) {
 
 	s.MOTD = profile.MOTD
 	s.IsPublic = profile.IsPublic
+	s.BackgroundImage = profile.BackgroundImage
 
 	s.StatusLock.Unlock()
 }
@@ -259,11 +260,12 @@ func (s *Session) GetStreamStatus() (status whipSessionStatus) {
 	s.StatusLock.RLock()
 
 	status = whipSessionStatus{
-		StreamKey:   s.StreamKey,
-		MOTD:        s.MOTD,
-		ViewerCount: whepSessionsCount,
-		IsOnline:    s.HasHost.Load(),
-		StreamStart: s.StreamStart,
+		StreamKey:       s.StreamKey,
+		MOTD:            s.MOTD,
+		BackgroundImage: s.BackgroundImage,
+		ViewerCount:     whepSessionsCount,
+		IsOnline:        s.HasHost.Load(),
+		StreamStart:     s.StreamStart,
 	}
 
 	s.StatusLock.RUnlock()

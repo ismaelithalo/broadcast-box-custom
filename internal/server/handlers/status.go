@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/glimesh/broadcast-box/internal/environment"
+	"github.com/glimesh/broadcast-box/internal/server/authorization"
 	"github.com/glimesh/broadcast-box/internal/server/helpers"
 	"github.com/glimesh/broadcast-box/internal/webrtc/sessions/manager"
 )
@@ -28,27 +29,38 @@ func streamStatusHandler(responseWriter http.ResponseWriter, request *http.Reque
 
 	session, ok := manager.SessionsManager.GetSessionByID(streamKey)
 
-	if !ok {
-		slog.Info("Could not find active stream", "streamKey", streamKey)
-		helpers.LogHTTPError(
-			responseWriter,
-			"No active stream found",
-			http.StatusNotFound)
-
+	if ok {
+		statusResult := session.GetStreamStatus()
+		responseWriter.Header().Add("Content-Type", "application/json")
+		if err := json.NewEncoder(responseWriter).Encode(statusResult); err != nil {
+			helpers.LogHTTPError(
+				responseWriter,
+				"Internal Server Error",
+				http.StatusInternalServerError)
+			slog.Error("API.Status Error", "err", err)
+		}
 		return
 	}
 
-	statusResult := session.GetStreamStatus()
-
-	if err := json.NewEncoder(responseWriter).Encode(statusResult); err != nil {
-		helpers.LogHTTPError(
-			responseWriter,
-			"Internal Server Error",
-			http.StatusInternalServerError)
-		slog.Error("API.Status Error", "err", err)
+	// Session is not live, check if profile exists
+	if profile, err := authorization.GetProfileByStreamKey(streamKey); err == nil && profile != nil {
+		offlineStatus := map[string]interface{}{
+			"streamKey":       streamKey,
+			"motd":            profile.MOTD,
+			"backgroundImage": profile.BackgroundImage,
+			"viewers":         0,
+			"isOnline":        false,
+		}
+		responseWriter.Header().Add("Content-Type", "application/json")
+		_ = json.NewEncoder(responseWriter).Encode(offlineStatus)
+		return
 	}
 
-	responseWriter.Header().Add("Content-Type", "application/json")
+	slog.Info("Could not find active stream or profile", "streamKey", streamKey)
+	helpers.LogHTTPError(
+		responseWriter,
+		"No active stream found",
+		http.StatusNotFound)
 }
 
 func sessionStatusesHandler(responseWriter http.ResponseWriter, request *http.Request) {

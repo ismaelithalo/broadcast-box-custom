@@ -126,3 +126,37 @@ func ProfileRemoveHandler(responseWriter http.ResponseWriter, request *http.Requ
 
 	responseWriter.WriteHeader(http.StatusOK)
 }
+
+type adminUpdateStreamPayload struct {
+	StreamKey       string `json:"streamKey"`
+	MOTD            string `json:"motd"`
+	IsPublic        bool   `json:"isPublic"`
+	BackgroundImage string `json:"backgroundImage"`
+}
+
+// Update settings (motd, privacy, background) of an existing stream profile
+func ProfileUpdateHandler(responseWriter http.ResponseWriter, request *http.Request) {
+	if isValidMethod := verifyValidMethod("POST", responseWriter, request); !isValidMethod {
+		return
+	}
+
+	sessionResult := verifyAdminSession(request)
+	if !sessionResult.IsValid {
+		helpers.LogHTTPError(responseWriter, sessionResult.ErrorMessage, http.StatusUnauthorized)
+		return
+	}
+
+	var payload adminUpdateStreamPayload
+	if err := json.NewDecoder(request.Body).Decode(&payload); err != nil {
+		helpers.LogHTTPError(responseWriter, "Error resolving request", http.StatusBadRequest)
+		return
+	}
+
+	if err := authorization.UpdateProfileByStreamKey(payload.StreamKey, payload.MOTD, payload.IsPublic, payload.BackgroundImage); err != nil {
+		slog.Error("API.Admin.ProfileUpdateHandler", "err", err)
+		helpers.LogHTTPError(responseWriter, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	responseWriter.WriteHeader(http.StatusOK)
+}

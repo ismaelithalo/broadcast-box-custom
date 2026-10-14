@@ -16,10 +16,11 @@ type Session struct {
 	StatusLock sync.RWMutex
 	StreamKey  string
 
-	MOTD        string
-	HasHost     atomic.Bool
-	IsPublic    bool
-	StreamStart time.Time
+	MOTD            string
+	BackgroundImage string
+	HasHost         atomic.Bool
+	IsPublic        bool
+	StreamStart     time.Time
 
 	Host atomic.Pointer[whip.WHIPSession]
 

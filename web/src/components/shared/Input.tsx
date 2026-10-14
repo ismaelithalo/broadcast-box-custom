@@ -3,7 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 interface Props {
   label?: string;
   value?: string;
-  setValue: Dispatch<SetStateAction<string>>;
+  setValue?: (value: string) => void;
 
   onKeyUp?: () => void;
   onEnterKeyUp?: () => void;
@@ -24,10 +24,10 @@ export default function Input(props: Props) {
 
       <input
         type='text'
-        value={props.value}
+        value={props.value ?? ""}
         placeholder={props.placeholder}
         autoFocus={props.hasAutofocus}
-        onChange={(e) => props.setValue(() => (e.target.value))}
+        onChange={(e) => props.setValue?.(e.target.value)}
         onKeyUp={(e => {
           if (e.key === "Enter") {
             props.onEnterKeyUp?.()

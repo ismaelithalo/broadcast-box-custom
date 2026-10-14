@@ -76,6 +76,11 @@ export default defineConfig({
 					});
 				},
 			},
+			"/uploads": {
+				target: `${targetProtocol}${targetHostAddress}`,
+				changeOrigin: true,
+				secure: false,
+			},
 		},
 	},
 	css: {

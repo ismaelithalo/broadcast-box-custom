@@ -33,6 +33,23 @@ const PlayerPage = () => {
     localStorage.setItem("chat-open", String(isChatOpen));
   }, [isChatOpen]);
 
+  useEffect(() => {
+    streamKeys.forEach((key) => {
+      if (!key) return;
+      fetch(`/api/status?key=${encodeURIComponent(key)}`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data: StreamStatus | null) => {
+          if (data) {
+            setStreamStatuses((prev) => ({
+              ...prev,
+              [key]: data,
+            }));
+          }
+        })
+        .catch(() => {});
+    });
+  }, [streamKeys]);
+
   const addStream = (streamKey: string) => {
     if (streamKeys.some((key: string) => key.toLowerCase() === streamKey.toLowerCase())) {
       return;
@@ -155,7 +172,19 @@ const PlayerPage = () => {
         />
       )}
 
-      <div className={`flex flex-col w-full items-center ${!cinemaMode && "mx-auto px-2 py-2 container"}`} >
+      {(() => {
+        const singleStreamBg = isSingleStream ? streamStatuses[streamKeys[0]]?.backgroundImage : undefined;
+        return (
+          <div 
+            className={`flex flex-col w-full items-center min-h-[calc(100vh-4.5rem)] transition-all duration-500 ${!cinemaMode && "mx-auto px-2 py-2 container"}`}
+            style={singleStreamBg ? {
+              backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.70), rgba(15, 23, 42, 0.85)), url(${singleStreamBg})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundAttachment: 'fixed',
+              borderRadius: '0.75rem',
+            } : undefined}
+          >
         <div ref={playerGridRef} className="w-full">
           <ReactGridLayout
             dragConfig={{
@@ -175,40 +204,52 @@ const PlayerPage = () => {
             gridConfig={{ cols: 12, rowHeight: playerGridRowHeight, margin: [playerGridGap, playerGridGap], containerPadding: [0, 0] }}
           >
             {streamKeys.map((streamKey) => {
+              const profileBg = streamStatuses[streamKey]?.backgroundImage;
               return (
-                <div key={`${streamKey}_player_card`} className="min-w-0 flex h-full flex-col gap-1 overflow-hidden">
-                  <div className={isSingleStream ? "relative flex min-h-0 flex-1 flex-col gap-4 w-full" : "flex min-h-0 flex-1 flex-col gap-1"}>
-                    <div className={isSingleStream ? `min-w-0 min-h-0 flex-1 transition-[margin] duration-200 ${isSingleStreamChatSidebar ? (cinemaMode ? "mr-80" : "mr-[21rem]") : ""}` : "min-w-0 min-h-0 flex-1"}>
-                      <Player
-                        key={`${streamKey}_player`}
+                <div
+                  key={`${streamKey}_player_card`}
+                  className={`min-w-0 flex h-full flex-col gap-1 overflow-hidden transition-all duration-300 ${
+                    profileBg ? "p-3 rounded-xl bg-cover bg-center shadow-2xl relative" : ""
+                  }`}
+                  style={profileBg ? { backgroundImage: `url(${profileBg})` } : undefined}
+                >
+                  {profileBg && (
+                    <div className="absolute inset-0 bg-slate-950/65 backdrop-blur-[1px] rounded-xl pointer-events-none" />
+                  )}
+                  <div className={`relative z-10 flex flex-col h-full ${profileBg ? "gap-2" : "gap-1"}`}>
+                    <div className={isSingleStream ? "relative flex min-h-0 flex-1 flex-col gap-4 w-full" : "flex min-h-0 flex-1 flex-col gap-1"}>
+                      <div className={isSingleStream ? `min-w-0 min-h-0 flex-1 transition-[margin] duration-200 ${isSingleStreamChatSidebar ? (cinemaMode ? "mr-80" : "mr-[21rem]") : ""}` : "min-w-0 min-h-0 flex-1"}>
+                        <Player
+                          key={`${streamKey}_player`}
+                          streamKey={streamKey}
+                          cinemaMode={cinemaMode}
+                          fillContainer
+                          isChatOpen={isChatOpen}
+                          onToggleChat={() => setIsChatOpen((prev) => !prev)}
+                          onChatAdapterChange={setStreamChatAdapter}
+                          onReactionSenderChange={setStreamReactionSender}
+                          onStreamStatusChange={setStreamStatus}
+                          onCloseStream={isSingleStream ? () => navigate("/") : () => removeStream(streamKey)}
+                        />
+                      </div>
+
+                      <ChatPanel
                         streamKey={streamKey}
-                        cinemaMode={cinemaMode}
-                        fillContainer
-                        isChatOpen={isChatOpen}
-                        onToggleChat={() => setIsChatOpen((prev) => !prev)}
-                        onChatAdapterChange={setStreamChatAdapter}
-                        onReactionSenderChange={setStreamReactionSender}
-                        onStreamStatusChange={setStreamStatus}
-                        onCloseStream={isSingleStream ? () => navigate("/") : () => removeStream(streamKey)}
+                        variant={chatPanelVariant}
+                        isOpen={isChatOpen}
+                        adapter={chatAdapters[streamKey]}
+                        displayName={chatDisplayName}
+                        onReaction={reactionSenders[streamKey]}
+                        onChangeDisplayNameRequested={() => setIsDisplayNameModalOpen(true)}
                       />
                     </div>
 
-                    <ChatPanel
-                      streamKey={streamKey}
-                      variant={chatPanelVariant}
-                      isOpen={isChatOpen}
-                      adapter={chatAdapters[streamKey]}
-                      displayName={chatDisplayName}
-                      onReaction={reactionSenders[streamKey]}
-                      onChangeDisplayNameRequested={() => setIsDisplayNameModalOpen(true)}
+                    <StreamMOTD
+                      isOnline={streamStatuses[streamKey]?.isOnline ?? false}
+                      motd={streamStatuses[streamKey]?.motd ?? ""}
+                      className={isSingleStream ? "px-1" : "px-4"}
                     />
                   </div>
-
-                  <StreamMOTD
-                    isOnline={streamStatuses[streamKey]?.isOnline ?? false}
-                    motd={streamStatuses[streamKey]?.motd ?? ""}
-                    className={isSingleStream ? "px-1" : "px-4"}
-                  />
                 </div>
               );
             })}
@@ -232,7 +273,9 @@ const PlayerPage = () => {
           />
         </div>
       </div>
-    </div>
+    );
+  })()}
+</div>
   );
 };
 

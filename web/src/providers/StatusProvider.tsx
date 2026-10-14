@@ -1,8 +1,9 @@
-﻿import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 export interface StreamStatus {
 	streamKey: string;
 	motd: string;
+	backgroundImage?: string;
 	viewers: number;
 	isOnline: boolean;
 }
@@ -28,6 +29,7 @@ export interface WhepSession {
 export interface StatusResult {
 	streamKey: string;
 	motd: string;
+	backgroundImage?: string;
 	streamStart: Date;
 
 	videoTracks: VideoTrack[];
